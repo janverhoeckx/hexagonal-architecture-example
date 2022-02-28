@@ -1,5 +1,6 @@
 package nl.janverhoeckx.hexagonalarchitectureexample.domain.medication
 
+import nl.janverhoeckx.hexagonalarchitectureexample.domain.EventPublisher
 import nl.janverhoeckx.hexagonalarchitectureexample.domain.patient.Name
 import nl.janverhoeckx.hexagonalarchitectureexample.domain.patient.Patient
 import nl.janverhoeckx.hexagonalarchitectureexample.domain.practitioner.Practitioner
@@ -13,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 internal class MedicationDispenserTest {
@@ -29,6 +29,9 @@ internal class MedicationDispenserTest {
 
     @Mock
     private lateinit var practitionerRepository: PractitionerRepository
+
+    @Mock
+    private lateinit var eventPublisher: EventPublisher
 
     @Test
     fun `dispenseMedication with no previous dispensed medication`() {
@@ -49,5 +52,8 @@ internal class MedicationDispenserTest {
         val savedPatient = argumentCaptor.firstValue
         assertEquals(patient.id, savedPatient.id)
         assertEquals(1, savedPatient.dispensedMedication.size)
+        val dispensedMedication = savedPatient.dispensedMedication.first()
+
+        verify(eventPublisher).publishEvent(dispensedMedication)
     }
 }

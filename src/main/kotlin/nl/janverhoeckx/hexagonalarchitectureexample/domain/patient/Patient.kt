@@ -15,18 +15,28 @@ class Patient(
     val name: Name,
     val dispensedMedication: MutableList<MedicationDispense>
 ) {
-    fun dispenseMedication(medication: Medication, practitioner: Practitioner, quantity: Quantity) {
+    fun dispenseMedication(
+        medication: Medication,
+        practitioner: Practitioner,
+        quantity: Quantity
+    ): MedicationDispense {
         if (!canReceiveMedication(medication)) {
             throw MedicationDispensedToSoonException()
         }
-        dispensedMedication += MedicationDispense(medication, practitioner, quantity)
+        val medicationDispense = MedicationDispense(medication, practitioner, quantity)
+        dispensedMedication += medicationDispense
+        return medicationDispense
     }
 
     private fun canReceiveMedication(medication: Medication) =
-        dispensedMedication.none { medicationDispense ->
-            medicationDispense.medicationId == medication.id &&
-                    now().isAfter(
-                        medicationDispense.dispensedAt.plus(medication.minimalIntervalBetweenConsumptionInHours, HOURS)
+        dispensedMedication
+            .filter { medicationDispense -> medicationDispense.medicationId == medication.id }
+            .none { medicationDispense ->
+                now().isAfter(
+                    medicationDispense.dispensedAt.plus(
+                        medication.minimalIntervalBetweenConsumptionInHours,
+                        HOURS
                     )
-        }
+                )
+            }
 }

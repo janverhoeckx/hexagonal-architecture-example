@@ -1,11 +1,13 @@
 package nl.janverhoeckx.hexagonalarchitectureexample.domain.medication
 
+import nl.janverhoeckx.hexagonalarchitectureexample.domain.EventPublisher
 import java.util.*
 
 class MedicationDispenser(
     private val patientRepository: PatientRepository,
     private val medicationRegistry: MedicationRegistry,
-    private val practitionerRepository: PractitionerRepository
+    private val practitionerRepository: PractitionerRepository,
+    private val eventPublisher: EventPublisher
 ) {
     fun dispenseMedication(
         medicationId: UUID,
@@ -16,7 +18,10 @@ class MedicationDispenser(
         val patient = patientRepository.findById(patientId)
         val medication = medicationRegistry.findById(medicationId)
         val practitioner = practitionerRepository.findById(practitionerId)
-        patient.dispenseMedication(medication, practitioner, quantity)
+
+        val dispensedMedication = patient.dispenseMedication(medication, practitioner, quantity)
+
         patientRepository.save(patient)
+        eventPublisher.publishEvent(dispensedMedication)
     }
 }

@@ -6,4 +6,5 @@ import java.util.*
 interface PatientRepository {
     fun save(patient: Patient): Patient
     fun findById(id: UUID): Patient
+    fun findAll(): Collection<Patient>
 }
